@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # 1. Web Application (PHP + Apache)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # เชื่อมต่อโฟลเดอร์ src เข้ากับ Web Server ของ Docker
+    volumes:
+      - ./src:/var/www/html 
+    ports:
+      - "80:80"             # เข้าถึงเว็บแอปผ่าน http://localhost
+    depends_on:
+      - db
+      
+  # 2. Database Service (MariaDB)
+  db:
+    image: mariadb:10.5
+    environment:
+      # *** ใช้ข้อมูลนี้ในการเชื่อมต่อในโค้ด PHP ของคุณ ***
+      MYSQL_ROOT_PASSWORD: Puplication5 # << เปลี่ยนเป็นรหัสที่ซับซ้อน >>
+      MYSQL_DATABASE: publication_db 
+      MYSQL_USER: php_user                     
+      MYSQL_PASSWORD: php_password             
+    # การเก็บข้อมูลฐานข้อมูลถาวร
+    volumes:
+      - db_data:/var/lib/mysql 
+
+  # 3. Database Management Interface (phpMyAdmin)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: db                    # Hostname คือชื่อ Service ฐานข้อมูล
+      MYSQL_ROOT_PASSWORD: your_strong_root_password # ใช้รหัสเดียวกับ root DB
+    ports:
+      - "8080:80"                    # เข้าถึง phpMyAdmin ผ่าน http://localhost:8080
+    depends_on:
+      - db
+
+# กำหนด Volume สำหรับเก็บข้อมูล DB ถาวร
+volumes:
+  db_data:
