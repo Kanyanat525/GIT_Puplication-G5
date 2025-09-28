@@ -1,0 +1,173 @@
+<?php
+// ----------------------------
+// 1. เชื่อมต่อฐานข้อมูล
+// ----------------------------
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db   = "publication_db";
+
+$conn = new mysqli($host, $user, $pass, $db);
+if ($conn->connect_error) {
+    die("เชื่อมต่อฐานข้อมูลไม่สำเร็จ: " . $conn->connect_error);
+}
+
+// ----------------------------
+// 2. รับค่าจากฟอร์ม
+// ----------------------------
+$author = $_GET['author'] ?? '';
+$year_start = $_GET['year_start'] ?? '';
+$year_end = $_GET['year_end'] ?? '';
+$type = $_GET['type'] ?? '';
+
+// ----------------------------
+// 3. query ข้อมูล
+// ----------------------------
+$sql = "SELECT * FROM publications WHERE 1=1";
+if (!empty($author)) {
+    $sql .= " AND author LIKE '%" . $conn->real_escape_string($author) . "%'";
+}
+if (!empty($year_start) && !empty($year_end)) {
+    $sql .= " AND pub_year BETWEEN " . intval($year_start) . " AND " . intval($year_end);
+}
+if (!empty($type)) {
+    $sql .= " AND pub_type = '" . $conn->real_escape_string($type) . "'";
+}
+$result = $conn->query($sql);
+?>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ระบบค้นหาผลงานตีพิมพ์</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Tahoma, sans-serif;
+            background: linear-gradient(to bottom, #ffffff, #d7ebff);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        header .logo {
+            font-weight: bold;
+            font-size: 20px;
+        }
+        header .auth a {
+            margin-left: 15px;
+            text-decoration: none;
+            color: #000;
+        }
+        .search-bar {
+            flex-grow: 1;
+            margin: 0 20px;
+            display: flex;
+            align-items: center;
+        }
+        .search-bar input, .search-bar select {
+            padding: 6px;
+            margin-right: 8px;
+        }
+        .menu {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0;
+            gap: 40px;
+        }
+        .menu-item {
+            width: 100px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .menu-item img {
+            width: 64px;
+            height: 64px;
+            display: block;
+            margin: auto;
+        }
+        .menu-item span {
+            display: block;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        table {
+            width: 90%;
+            margin: 30px auto;
+            border-collapse: collapse;
+            background: #fff;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background: #007BFF;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">โลโก้</div>
+    <form method="get" class="search-bar">
+        <input type="text" name="author" placeholder="ค้นหาชื่อผู้แต่ง" value="<?= htmlspecialchars($author) ?>">
+        <input type="number" name="year_start" placeholder="เริ่มปี" value="<?= htmlspecialchars($year_start) ?>">
+        <input type="number" name="year_end" placeholder="ถึงปี" value="<?= htmlspecialchars($year_end) ?>">
+        <select name="type">
+            <option value="">--ประเภท--</option>
+            <option value="ตำรา" <?= $type=="ตำรา"?"selected":"" ?>>ตำรา</option>
+            <option value="วารสาร" <?= $type=="วารสาร"?"selected":"" ?>>วารสาร</option>
+            <option value="บทความ" <?= $type=="บทความ"?"selected":"" ?>>บทความ</option>
+            <option value="อื่นๆ" <?= $type=="อื่นๆ"?"selected":"" ?>>อื่นๆ</option>
+        </select>
+        <button type="submit">ค้นหา</button>
+    </form>
+    <div class="auth">
+        <a href="#">ลงทะเบียน</a> | 
+        <a href="#">เข้าสู่ระบบ</a>
+    </div>
+</header>
+
+<div class="menu">
+    <div class="menu-item"><img src="icons/book.png"><span>ตำรา</span></div>
+    <div class="menu-item"><img src="icons/journal.png"><span>วารสาร</span></div>
+    <div class="menu-item"><img src="icons/article.png"><span>บทความ</span></div>
+    <div class="menu-item"><img src="icons/more.png"><span>อื่นๆ</span></div>
+</div>
+
+<?php if ($result && $result->num_rows > 0): ?>
+    <table>
+        <tr>
+            <th>ชื่อเรื่อง</th>
+            <th>ผู้แต่ง</th>
+            <th>ปีที่ตีพิมพ์</th>
+            <th>ประเภท</th>
+            <th>ไฟล์แนบ</th>
+        </tr>
+        <?php while($row = $result->fetch_assoc()): ?>
+            <tr>
+                <td><?= htmlspecialchars($row['title']) ?></td>
+                <td><?= htmlspecialchars($row['author']) ?></td>
+                <td><?= htmlspecialchars($row['pub_year']) ?></td>
+                <td><?= htmlspecialchars($row['pub_type']) ?></td>
+                <td>
+                    <?php if (!empty($row['file_path'])): ?>
+                        <a href="<?= htmlspecialchars($row['file_path']) ?>" target="_blank">📄 ดูไฟล์</a>
+                    <?php else: ?>
+                        -
+                    <?php endif; ?>
+                </td>
+            </tr>
+        <?php endwhile; ?>
+    </table>
+<?php else: ?>
+    <p style="text-align:center; margin: 30px;">ไม่พบข้อมูลผลงานตีพิมพ์</p>
+<?php endif; ?>
+</body>
+</html>
