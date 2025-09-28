@@ -1,0 +1,77 @@
+import React, { useState } from "react";
+
+const UserList = () => {
+  const [users, setUsers] = useState([
+    {
+      id: 1,
+      name: "สมบัติ",
+      email: "somnuk@gmail.com",
+      status: "เปิดใช้งาน",
+    },
+  ]);
+
+  // ฟังก์ชันตัวอย่าง
+  const handleEditRole = (id) => {
+    alert(`แก้ไขสิทธิ์ผู้ใช้ ID: ${id}`);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm("คุณแน่ใจหรือไม่ที่จะลบผู้ใช้นี้?")) {
+      setUsers(users.filter((user) => user.id !== id));
+    }
+  };
+
+  const handleResetPassword = (id) => {
+    alert(`รีเซ็ตรหัสผ่านผู้ใช้ ID: ${id}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-sky-200 flex flex-col items-center py-10">
+      <h1 className="text-2xl font-bold mb-8">รายชื่อผู้ใช้งาน</h1>
+
+      <table className="bg-white shadow-lg rounded-xl overflow-hidden w-3/4 text-center">
+        <thead className="bg-sky-200">
+          <tr>
+            <th className="py-3 px-4">ลำดับ</th>
+            <th className="py-3 px-4">ชื่อผู้ใช้งาน</th>
+            <th className="py-3 px-4">อีเมล</th>
+            <th className="py-3 px-4">สถานะ</th>
+            <th className="py-3 px-4">การดำเนินการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user, index) => (
+            <tr key={user.id} className="border-b">
+              <td className="py-2">{index + 1}</td>
+              <td className="py-2">{user.name}</td>
+              <td className="py-2">{user.email}</td>
+              <td className="py-2">{user.status}</td>
+              <td className="py-2 flex justify-center gap-2">
+                <button
+                  className="bg-red-200 text-red-700 px-3 py-1 rounded-lg hover:bg-red-300"
+                  onClick={() => handleEditRole(user.id)}
+                >
+                  แก้ไขสิทธิ์ ✖
+                </button>
+                <button
+                  className="bg-red-200 text-red-700 px-3 py-1 rounded-lg hover:bg-red-300"
+                  onClick={() => handleDelete(user.id)}
+                >
+                  ลบผู้ใช้ ✖
+                </button>
+                <button
+                  className="bg-yellow-400 text-black px-3 py-1 rounded-lg hover:bg-yellow-500"
+                  onClick={() => handleResetPassword(user.id)}
+                >
+                  รีเซ็ตรหัสผ่าน ✖
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default UserList;
