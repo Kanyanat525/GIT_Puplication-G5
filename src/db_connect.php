@@ -1,12 +1,11 @@
-
 <?php
-// กำหนดค่าการเชื่อมต่อ (ดึงมาจาก docker-compose.yml)
-define('DB_SERVER', 'db');
-define('DB_USERNAME', 'Pup_addmin');
-define('DB_PASSWORD', 'Publication5');
+
+define('DB_SERVER', 'localhost');
+define('DB_USERNAME', 'root');
+define('DB_PASSWORD', '');
 define('DB_NAME', 'publication_db');
 
-// เชื่อมต่อฐานข้อมูล MySQL
+/* พยายามเชื่อมต่อฐานข้อมูล MySQLi */
 $conn = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
 // ตรวจสอบการเชื่อมต่อ
